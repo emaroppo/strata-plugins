@@ -12,8 +12,8 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import ClassVar
 
-from strata.catalog import checksum_of
-from strata.catalog.types.preparers import Prepared, Preparer, PreparerError
+from strata.prepare import Prepared, Preparer, PreparerError
+from strata.prepare.files import checksum_of
 
 #: Container formats to admit, not codecs. docs/adr/0010
 CONTAINERS = frozenset({"mp4", "mov", "mkv", "avi", "webm", "m4v"})
@@ -45,7 +45,7 @@ class VideoFramesPreparer(Preparer):
         self.max_frames = max_frames
         self.quality = quality
 
-    def prepare(self, source: Path, out_dir: Path) -> Iterable[Prepared]:
+    def prepare(self, source: Path, out_dir: Path, *, root: Path) -> Iterable[Prepared]:
         import cv2
 
         source = Path(source)

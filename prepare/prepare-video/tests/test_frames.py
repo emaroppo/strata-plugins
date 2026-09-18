@@ -11,9 +11,9 @@ import pytest
 cv2 = pytest.importorskip("cv2", reason="needs the video preparer's decoder")
 np = pytest.importorskip("numpy")
 
-from strata.catalog.types.prepared import PreparedIndex  # noqa: E402
-from strata.catalog.types.preparer_conformance import PreparerContract  # noqa: E402
-from strata.catalog.types.preparers import PreparerError, run  # noqa: E402
+from strata.contracts import Frames, check  # noqa: E402
+from strata.prepare import PreparerError, load_index, run  # noqa: E402
+from strata.prepare.conformance import PreparerContract  # noqa: E402
 from strata.prepare_video.frames import VideoFramesPreparer  # noqa: E402
 
 FPS = 10.0
@@ -58,24 +58,19 @@ def test_two_videos_are_two_groups(tmp_path):
     assert len({entry.metadata["video"] for entry in index.samples.values()}) == 2
 
 
-def test_the_frames_are_admitted_by_the_frames_type(clip, tmp_path):
-    from strata.catalog.types.sample_types import resolve
-
+def test_the_frames_meet_the_frames_type(clip, tmp_path):
+    """Admitted, and each saying its video: what a catalog checks first."""
     out = tmp_path / "out"
     index = run(VideoFramesPreparer(every=5), [clip], out)
-    frames = resolve("frames")()
-    assert all(frames.allows(out / name) for name in index.samples)
+    checked = check(index, Frames(), "frames", set(index.samples))
+    assert checked.ok, checked.violations
 
 
-def test_the_type_reads_the_group_off_the_index(clip, tmp_path):
-    """What a directory layout could only imply, declared as a fact."""
-    from strata.catalog.types.sample_types import resolve
-
-    out = tmp_path / "out"
-    index = run(VideoFramesPreparer(every=5), [clip], out)
-    frames = resolve("frames")()
-    name = next(iter(index.samples))
-    assert frames.metadata_for(out / name, out)["video"] == index.samples[name].metadata["video"]
+def test_the_video_is_the_directory_its_frames_are_in(clip, tmp_path):
+    """What the layout implies and the index declares say the same thing."""
+    index = run(VideoFramesPreparer(every=5), [clip], tmp_path / "out")
+    for name, entry in index.samples.items():
+        assert name.split("/")[0] == entry.metadata["video"]
 
 
 def test_a_frame_knows_where_in_the_video_it_was(clip, tmp_path):
@@ -118,7 +113,7 @@ def test_a_stride_below_one_is_refused():
 def test_the_index_survives_being_written(clip, tmp_path):
     out = tmp_path / "out"
     index = run(VideoFramesPreparer(every=5), [clip], out)
-    assert PreparedIndex.load(out).samples.keys() == index.samples.keys()
+    assert load_index(out).samples.keys() == index.samples.keys()
 
 
 class TestVideoFramesConform(PreparerContract):

@@ -17,8 +17,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - plugin: catalog/prepare-video
-            siblings: contracts common catalog
+          - plugin: prepare/prepare-video
+            siblings: contracts common prepare
             standalone: strata-prepare-video[test]
     steps:
       - uses: actions/checkout@v4
