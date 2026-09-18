@@ -4,8 +4,16 @@ Video into frames a catalog can take, each recording which video it came
 from, so a project can keep a video on one side of a split. A plugin to
 `strata-prepare`, found through its entry points, carrying OpenCV.
 
+Not on PyPI: it installs from its repository at a release tag. uv takes a
+git source only for a package named directly, so the strata packages
+beneath it are named beside it.
+
 ```bash
-uv add strata-prepare-video
+g=git+https://github.com/emaroppo
+uv add "strata-prepare-video @ $g/strata-plugins@v0.1.0#subdirectory=prepare/prepare-video" \
+       "strata-prepare @ $g/strata-prepare@v0.1.0"                                          \
+       "strata-contracts @ $g/strata-contracts@v0.1.0"                                      \
+       "strata-common @ $g/strata-common@v0.1.0"
 ```
 
 ## What it adds

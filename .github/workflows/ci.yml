@@ -6,8 +6,8 @@ on:
   pull_request:
 
 # One job per plugin directory. Each is a distribution of its own; the
-# strata packages it builds on come from wheels built beside it until they
-# are on an index (.github/sibling-wheels.sh, run from this root).
+# strata packages it builds on come from wheels built beside it, from their
+# repositories (.github/sibling-wheels.sh, run from this root).
 
 jobs:
   plugin:

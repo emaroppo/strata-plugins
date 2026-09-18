@@ -15,9 +15,9 @@ suite the plugin's tests run.
 
 ## Tests
 
-Each plugin is tested from its own directory. Until the strata packages
-are on an index, the ones a plugin builds on come from wheels built beside
-this checkout:
+Each plugin is tested from its own directory. The strata packages a plugin
+builds on come from wheels built beside this checkout, from their
+repositories:
 
 ```bash
 .github/sibling-wheels.sh contracts common prepare
