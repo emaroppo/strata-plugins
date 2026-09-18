@@ -18,7 +18,7 @@ jobs:
       matrix:
         include:
           - plugin: catalog/prepare-video
-            siblings: labels common catalog
+            siblings: contracts common catalog
             standalone: strata-prepare-video[test]
     steps:
       - uses: actions/checkout@v4

@@ -20,7 +20,7 @@ are on an index, the ones a plugin builds on come from wheels built beside
 this checkout:
 
 ```bash
-.github/sibling-wheels.sh labels common catalog
+.github/sibling-wheels.sh contracts common catalog
 cd catalog/prepare-video
 uv sync --find-links ../../dist --group dev --extra test
 uv run pytest

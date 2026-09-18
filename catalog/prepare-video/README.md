@@ -36,7 +36,7 @@ umbrella repository: https://github.com/emaroppo/strata/tree/main/docs/adr.
 
 ```bash
 cd catalog/prepare-video      # in the strata-plugins repository
-uv sync --find-links ../../dist --group dev --extra test   # after .github/sibling-wheels.sh labels common catalog
+uv sync --find-links ../../dist --group dev --extra test   # after .github/sibling-wheels.sh contracts common catalog
 uv run pytest
 ```
 
