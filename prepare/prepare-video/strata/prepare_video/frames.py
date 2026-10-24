@@ -1,11 +1,8 @@
 """Extracting frames, and declaring which video they came from.
 
-**The grouping is the point.** Consecutive frames are near-duplicates
-(``docs/adr/0003``), so each frame records its video in the prepared index;
-frames are still written one directory per video (``docs/adr/0010``).
-
-**Every frame is decoded, and most are thrown away**, never sought
-(``docs/adr/0033``).
+Each frame records its video in the index and is written under one directory
+per video; every frame is decoded, never sought. See ``docs/adr/0003``,
+``docs/adr/0010``, ``docs/adr/0023`` and ``docs/adr/0033``.
 """
 
 from collections.abc import Iterable
@@ -18,8 +15,7 @@ from strata.prepare.files import checksum_of
 #: Container formats to admit, not codecs. docs/adr/0010
 CONTAINERS = frozenset({"mp4", "mov", "mkv", "avi", "webm", "m4v"})
 
-#: Enough of the video's own checksum to name its directory uniquely while
-#: leaving the stem readable in front of it.
+#: Enough of the video's checksum to name its directory uniquely behind a readable stem.
 DIGEST_CHARS = 12
 
 
@@ -31,13 +27,10 @@ class VideoFramesPreparer(Preparer):
     sources: ClassVar[frozenset[str]] = CONTAINERS
 
     def __init__(self, every: int = 30, max_frames: int | None = None, quality: int = 95):
-        """``every`` frames, at most ``max_frames`` of them.
+        """Every ``every``th frame, at most ``max_frames`` of them.
 
-        One in thirty is about one a second on ordinary footage, and a
-        second apart is roughly where consecutive frames stop being the
-        same picture. Both are declared rather than clever: what a corpus
-        needs depends on what is in it, and a default that guessed would be
-        wrong quietly.
+        The defaults are declared, not inferred from the footage: one in
+        thirty is about one a second, where consecutive frames stop matching.
         """
         if every < 1:
             raise PreparerError(f"every must be at least 1, got {every}")
@@ -46,6 +39,8 @@ class VideoFramesPreparer(Preparer):
         self.quality = quality
 
     def prepare(self, source: Path, out_dir: Path, *, root: Path) -> Iterable[Prepared]:
+        # Lazy: for_source() resolves every registered preparer to pick one, so a
+        # module-level import would load OpenCV whenever any file is prepared.
         import cv2
 
         source = Path(source)
@@ -58,8 +53,7 @@ class VideoFramesPreparer(Preparer):
                 f"install rather than about the file."
             )
 
-        # The video's own checksum, so its frames keep their names.
-        # docs/adr/0033
+        # The video's checksum, so a renamed source keeps its frames' names. docs/adr/0033
         group = f"{source.stem[-60:]}-{checksum_of(source)[:DIGEST_CHARS]}"
         directory = Path(out_dir) / group
         directory.mkdir(parents=True, exist_ok=True)
@@ -84,8 +78,7 @@ class VideoFramesPreparer(Preparer):
                             "frame_index": index,
                             # Null rather than a wrong number. docs/adr/0038
                             "seconds": round(index / fps, 3) if fps > 0 else None,
-                            # Which video, as a fact: what a project names as
-                            # its group_by. docs/adr/0023
+                            # Which video: what a project names as group_by. docs/adr/0023
                             "video": group,
                         },
                     )
